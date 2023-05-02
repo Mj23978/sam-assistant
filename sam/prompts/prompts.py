@@ -6,7 +6,6 @@ from steamship_langchain.tools import SteamshipSERP
 from sam.utils import logger
 
 
-
 def get_tools(client):
     todo_prompt = PromptTemplate.from_template(
         "You are a planner who is an expert at coming up with a todo list for a given objective. Come up with a todo list for this objective: {objective}"
