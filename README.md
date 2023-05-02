@@ -1,6 +1,7 @@
 # Sam-assistant
 
 **Note:** This project is in its early stages, and the code may undergo drastic changes.
+**Note2:** The Gpt Folder is My Custom Fork of GPT4Free you Could Clone the repo and put the content under gpt folder too it will work 
 
 ## Overview
 
