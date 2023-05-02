@@ -3,6 +3,7 @@ import copy
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from langchain.chains import RetrievalQA
+from langchain.agents import initialize_agent
 
 from sam.chains.chains import create_chain
 from sam.llms.llms import EmbeddingLoader, LLMLoader
@@ -98,6 +99,15 @@ async def search():
 
     response = qa.run(query)
 
+    return {"response": response}
+
+
+@app.get("/agents/1")
+async def agents_1():
+    model = LLMLoader("theb").load_model()
+    tools = [
+        Tool()
+    ]
     return {"response": response}
 
 

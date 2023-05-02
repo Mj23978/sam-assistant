@@ -36,6 +36,8 @@ selenium = "^4.9.0"
 fake-useragent = "^1.1.3"
 TwoCaptcha = "^0.0.1"
 chromadb = "^0.3.21"
+wikipedia = "^1.4.0"
+duckduckgo-search = "^2.9.1"
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.0.2"

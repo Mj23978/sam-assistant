@@ -22,11 +22,11 @@ class InternetLoader:
             self.k = kwargs.get("k")
         self.client = SearxSearchWrapper(searx_host=self.host, k=self.k)
 
-    def load_serax(self, prompt: str, **kwargs):
+    def load_serax(self, query: str, **kwargs):
         language = self.language if kwargs.get("language") is None else kwargs["language"]
         engines = self.engines if kwargs.get("engines") is None else kwargs["engines"]
         categories = self.categories if kwargs.get("categories") is None else kwargs["categories"]
         num_results = 5 if kwargs.get(
             "num_results") is None else kwargs["num_results"]
-        search = self.client.run(query=prompt, engines=engines, categories=categories, language=language, num_results=num_results)
+        search = self.client.run(query=query, engines=engines, categories=categories, language=language, num_results=num_results)
         return search
