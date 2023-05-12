@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package myservice;
+
+service SamChat {
+  rpc Complete(CompleteRequest) returns (CompleteResponse) {}
+}
+
+message CompleteRequest { string message = 1; }
+
+message CompleteResponse {
+  string message = 1;
+  string more = 2;
+}

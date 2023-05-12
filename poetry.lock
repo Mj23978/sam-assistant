@@ -503,6 +503,14 @@ docs = ["Sphinx", "docutils (<0.18)"]
 test = ["objgraph", "psutil"]
 
 [[package]]
+name = "grpc-tools"
+version = "1.0.0"
+description = "Please install the official package with: pip install grpcio-tools"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "h11"
 version = "0.9.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -2213,7 +2221,7 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "7b4349d8c1d75f55cfd97672ad28c601b416f6db6cd0f5bb675d1b275ec53d6b"
+content-hash = "b56075b1f3852c3ee55a427ecfdc9852425ae2d8bf549ac5a5874bad38907da9"
 
 [metadata.files]
 aiohttp = [
@@ -2885,6 +2893,9 @@ greenlet = [
     {file = "greenlet-2.0.2-cp39-cp39-win32.whl", hash = "sha256:ea9872c80c132f4663822dd2a08d404073a5a9b5ba6155bea72fb2a79d1093b5"},
     {file = "greenlet-2.0.2-cp39-cp39-win_amd64.whl", hash = "sha256:db1a39669102a1d8d12b57de2bb7e2ec9066a6f2b3da35ae511ff93b01b5d564"},
     {file = "greenlet-2.0.2.tar.gz", hash = "sha256:e7c8dc13af7db097bed64a051d2dd49e9f0af495c26995c00a9ee842690d34c0"},
+]
+grpc-tools = [
+    {file = "grpc-tools-1.0.0.tar.gz", hash = "sha256:ac97761075f466e184962fe61b8e81c97101cce541d4e29750edd4cc82bb087d"},
 ]
 h11 = [
     {file = "h11-0.9.0-py2.py3-none-any.whl", hash = "sha256:4bc6d6a1238b7615b266ada57e0618568066f57dd6fa967d1290ec9309b2f2f1"},
