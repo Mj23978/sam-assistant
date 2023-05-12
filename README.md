@@ -2,6 +2,8 @@
 
 **Note:** This project is in its early stages, and the code may undergo drastic changes.
 
+**Note2:** The Gpt Folder is My Custom Fork of GPT4Free you Could Clone the repo and put the content under gpt folder too it will work 
+
 ## Overview
 
 Sam-assistant is a personal assistant that is designed to understand your documents, search the internet, and in future versions, create and understand images, and communicate with you. It is built in Python, mainly using Langchain and implements most of Langchain's capabilities.
