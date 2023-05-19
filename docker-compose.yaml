@@ -1,0 +1,128 @@
+version: '3.7'
+
+services:
+
+  caddy:
+    container_name: caddy
+    image: caddy:2-alpine
+    network_mode: host
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data:rw
+      - caddy-config:/config:rw
+    environment:
+      - SEARXNG_HOSTNAME=${SEARXNG_HOSTNAME:-http://localhost:80}
+      - SEARXNG_TLS=${LETSENCRYPT_EMAIL:-internal}
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
+  redis:
+    container_name: redis
+    image: "redis:alpine"
+    command: redis-server --save "" --appendonly "no"
+    networks:
+      - sam
+    ports:
+     - "6379:6379"
+    tmpfs:
+      - /var/lib/redis
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+
+  searxng:
+    container_name: searxng
+    image: searxng/searxng:latest
+    networks:
+      - sam
+    ports:
+     - "127.0.0.1:8080:8080"
+    volumes:
+      - ./docker/searxng:/etc/searxng:rw
+    environment:
+      - SEARXNG_BASE_URL=https://${SEARXNG_HOSTNAME:-localhost}/
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+
+
+  etcd:
+    container_name: milvus-etcd
+    image: quay.io/coreos/etcd:v3.5.5
+    environment:
+      - ETCD_AUTO_COMPACTION_MODE=revision
+      - ETCD_AUTO_COMPACTION_RETENTION=1000
+      - ETCD_QUOTA_BACKEND_BYTES=4294967296
+      - ETCD_SNAPSHOT_COUNT=50000
+    volumes:
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/etcd:/etcd
+    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+    networks:
+      - sam
+  
+  minio:
+    container_name: milvus-minio
+    image: minio/minio:RELEASE.2022-03-17T06-34-49Z
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    volumes:
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/minio:/minio_data
+    command: minio server /minio_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - sam
+
+  standalone:
+    container_name: milvus-standalone
+    image: milvusdb/milvus:v2.2.7
+    command: ["milvus", "run", "standalone"]
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+    volumes:
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/milvus:/var/lib/milvus
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    depends_on:
+      - "etcd"
+      - "minio"
+    networks:
+      - sam
+
+  gui:
+    container_name: milvus-gui
+    image: zilliz/attu:v2.2.3
+    environment:
+      MILVUS_URL: standalone:19530
+    ports:
+      - "8000:3000"
+    depends_on:
+      - "standalone"
+    networks:
+     - sam
+
+networks:
+  sam:
+    ipam:
+      driver: default
+
+volumes:
+  caddy-data:
+  caddy-config:

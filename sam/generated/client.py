@@ -1,9 +1,8 @@
 import asyncio
 
 from grpclib.client import Channel
-from myservice import (CompleteRequest, CompleteResponse, SamChatBase,
+from chatbot import (CompleteRequest, CompleteResponse, SamChatBase,
                        SamChatStub)
-
 
 async def main():
     channel = Channel(host="127.0.0.1", port=50051)

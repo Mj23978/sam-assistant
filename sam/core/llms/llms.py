@@ -1,28 +1,30 @@
 import os
-from typing import Dict, Optional, Type
+from typing import Any, Dict, Optional, Type # type: ignore
 
 import langchain
 from langchain.cache import InMemoryCache
-from langchain.callbacks.base import CallbackManager
+from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.embeddings import (CohereEmbeddings, LlamaCppEmbeddings,
                                   OpenAIEmbeddings)
 from langchain.llms import Cohere, LlamaCpp, OpenAI
 from langchain.llms.fake import FakeListLLM
-from langchain.llms.base import LLM
 
 from sam.core.llms.openai_hosted import OpenAIHosted
 from sam.core.llms.poe import Poe
 from sam.core.llms.theb import Theb
+from sam.core.llms.useless import Useless
+from sam.core.llms.you import You
 from sam.core.utils import logger
 
 langchain.llm_cache = InMemoryCache()
 
 
 class LLMLoader:
+    args: tuple
+    kwargs: dict[str, Any]
+   
     model_type: Optional[str] = "cohere"
-    args: Optional[tuple] = None
-    kwargs: Optional[dict] = None
     stop: Optional[list] = ["### Humen:",
                             "### Instruction:", "### Assistant:", "\nQuestion:"]
     n_ctx: Optional[int] = 2048
@@ -55,31 +57,11 @@ class LLMLoader:
         if kwargs.get("temperature") is not None:
             self.temperature = kwargs["temperature"]
 
-    def load_model(self) -> Type[LLM]:
-        logger.info("Loading the model ...")
-
-        if self.model_type == "llamacpp":
-            return self.load_llamacpp()
-        elif self.model_type == "cohere":
-            return self.load_cohere()
-        elif self.model_type == "openai":
-            return self.load_openai()
-        elif self.model_type == "theb":
-            return self.load_theb()
-        elif self.model_type == "poe":
-            return self.load_poe()
-        elif self.model_type == "openaihosted":
-            return self.load_oah()
-        elif self.model_type == "fake":
-            return self.load_fake()
-        else:
-            raise ValueError("Item not found")
-
-    def load_llamacpp(self):
+    def load_llamacpp(self) -> LlamaCpp:
         model_size = os.environ.get("VICUNA7B_MODEL_PATH") if self.kwargs.get(
             "model_size") == "7b" else os.environ.get("VICUNA_MODEL_PATH")
         model = model_size if self.kwargs.get(
-            "model_name") is None else self.kwargs["model_name"]
+            "model_name") is None else self.kwargs.get("model_name")
         model_name = fr"{model}"
         return LlamaCpp(
             cache=True,
@@ -97,9 +79,9 @@ class LLMLoader:
             temperature=self.temperature,
             callback_manager=CallbackManager(
                 [StreamingStdOutCallbackHandler()]),
-        )
+        ) # type: ignore
 
-    def load_cohere(self):
+    def load_cohere(self) -> Cohere:
         model = "command-xlarge-nightly" if self.kwargs.get(
             "model_name") is None else self.kwargs["model_name"]
         cohere_api = os.environ.get("COHERE_API_KEY")
@@ -114,9 +96,9 @@ class LLMLoader:
             verbose=True,
             callback_manager=CallbackManager(
                 [StreamingStdOutCallbackHandler()]),
-        )
+        ) # type: ignore
 
-    def load_openai(self):
+    def load_openai(self) -> OpenAI:
         api_key = os.environ.get("OPENAI_API_KEY")
         # model = "text-ada-001" if self.kwargs.get(
         model = "gpt3.5-turbo" if self.kwargs.get(
@@ -132,9 +114,9 @@ class LLMLoader:
             verbose=True,
             callback_manager=CallbackManager(
                 [StreamingStdOutCallbackHandler()]),
-        )
+        ) # type: ignore
 
-    def load_theb(self):
+    def load_theb(self) -> Theb:
         return Theb(
             cache=True,
             verbose=True,
@@ -142,7 +124,23 @@ class LLMLoader:
                 [StreamingStdOutCallbackHandler()]),
         )
 
-    def load_poe(self):
+    def load_you(self) -> You:
+        return You(
+            cache=True,
+            verbose=True,
+            callback_manager=CallbackManager(
+                [StreamingStdOutCallbackHandler()]),
+        )
+
+    def load_useless(self) -> Useless:
+        return Useless(
+            cache=True,
+            verbose=True,
+            callback_manager=CallbackManager(
+                [StreamingStdOutCallbackHandler()]),
+        )
+
+    def load_poe(self) -> Poe:
         model = "gpt-3.5-turbo" if self.kwargs.get(
             "model_name") is None else self.kwargs["model_name"]
         custom = "gpt-3.5-turbo" if self.kwargs.get(
@@ -156,9 +154,9 @@ class LLMLoader:
             verbose=True,
             callback_manager=CallbackManager(
                 [StreamingStdOutCallbackHandler()]),
-        )
+        ) # type: ignore
 
-    def load_oah(self):
+    def load_oah(self) -> OpenAIHosted:
         systemP = "You are ChatGPT" if self.kwargs.get(
             "systemprompt") is None else self.kwargs["systemprompt"]
         assistantP = "You are a helpful assistant." if self.kwargs.get(
@@ -172,7 +170,7 @@ class LLMLoader:
                 [StreamingStdOutCallbackHandler()]),
         )
 
-    def load_fake(self):
+    def load_fake(self) -> FakeListLLM:
         responses = [] if self.kwargs.get(
             "responses") is None else self.kwargs["responses"]
         return FakeListLLM(
@@ -210,7 +208,7 @@ class EmbeddingLoader:
                 model_path=model,
                 n_ctx=self.n_ctx,
                 n_threads=self.n_threads,
-            )
+            ) # type: ignore
             return embeddings
         elif self.model_type == "cohere":
             cohere_api = os.environ.get("COHERE_API_KEY")
@@ -219,7 +217,7 @@ class EmbeddingLoader:
             embeddings = CohereEmbeddings(
                 cohere_api_key=cohere_api,
                 model=model
-            )
+            ) # type: ignore
             return embeddings
         elif self.model_type == "openai":
             api_key = os.environ.get("OPENAI_API_KEY")
@@ -230,7 +228,7 @@ class EmbeddingLoader:
                 embedding_ctx_length=self.n_ctx,
                 max_retries=6,
                 openai_api_key=api_key,
-            )
+            ) # type: ignore
             return embeddings
         else:
             raise ValueError("Item not found")

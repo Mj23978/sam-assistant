@@ -2,7 +2,7 @@
   "python.formatting.provider": "black",
   "editor.formatOnSave": true,
   "python.languageServer": "Pylance",
-  "python.linting.enabled": true,
+  "python.linting.enabled": false,
   "python.testing.pytestArgs": [
     "tests"
   ],

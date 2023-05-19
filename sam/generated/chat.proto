@@ -1,14 +1,131 @@
 syntax = "proto3";
 
-package myservice;
+package chatbot;
 
-service SamChat {
-  rpc Complete(CompleteRequest) returns (CompleteResponse) {}
+// Language Model Service
+service LanguageModelService {
+  rpc GenerateText(GenerateTextRequest) returns (GenerateTextResponse) {}
 }
 
-message CompleteRequest { string message = 1; }
+message GenerateTextRequest { string user_input = 1; }
 
-message CompleteResponse {
-  string message = 1;
-  string more = 2;
+message GenerateTextResponse { string generated_text = 1; }
+
+// Prompt Formatting Service
+service PromptFormattingService {
+  rpc FormatPrompt(FormatPromptRequest) returns (FormatPromptResponse) {}
+}
+
+message FormatPromptRequest { string prompt_type = 1; }
+
+message FormatPromptResponse { string formatted_prompt = 1; }
+
+// Vector Database Service
+service VectorDatabaseService {
+  rpc StoreEmbedding(StoreEmbeddingRequest) returns (StoreEmbeddingResponse) {}
+  rpc SearchSimilar(SearchSimilarRequest) returns (SearchSimilarResponse) {}
+}
+
+message StoreEmbeddingRequest { string embedding = 1; }
+
+message StoreEmbeddingResponse { bool success = 1; }
+
+message SearchSimilarRequest { string query_embedding = 1; }
+
+message SearchSimilarResponse { repeated string similar_data = 1; }
+
+// Memory Service
+service MemoryService {
+  rpc SaveContext(SaveContextRequest) returns (SaveContextResponse) {}
+  rpc RetrieveContext(RetrieveContextRequest)
+      returns (RetrieveContextResponse) {}
+}
+
+message SaveContextRequest { string conversation_context = 1; }
+
+message SaveContextResponse { bool success = 1; }
+
+message RetrieveContextRequest {
+  // Any specific parameters required for context retrieval
+}
+
+message RetrieveContextResponse { string conversation_context = 1; }
+
+// Loader Service
+service LoaderService {
+  rpc LoadText(LoadTextRequest) returns (LoadTextResponse) {}
+}
+
+message LoadTextRequest { string text_source = 1; }
+
+message LoadTextResponse { bool success = 1; }
+
+// Integration Service
+service IntegrationService {
+  rpc CreateTask(CreateTaskRequest) returns (CreateTaskResponse) {}
+  rpc SolveTask(SolveTaskRequest) returns (SolveTaskResponse) {}
+}
+
+message CreateTaskRequest {
+  // Any specific parameters required for task creation
+}
+
+message CreateTaskResponse { string task_id = 1; }
+
+message SolveTaskRequest { string task_id = 1; }
+
+message SolveTaskResponse { string solution = 1; }
+
+// Chaining Service
+service ChainingService {
+  rpc ChainOutputs(ChainOutputsRequest) returns (ChainOutputsResponse) {}
+}
+
+message ChainOutputsRequest {
+  // Any specific parameters required for output chaining
+}
+
+message ChainOutputsResponse {
+  // Any response data from the chained outputs
+}
+
+// Configuration Service
+service ConfigurationService {
+  rpc GetAvailableLLMs(GetAvailableLLMsRequest)
+      returns (GetAvailableLLMsResponse) {}
+  rpc GetAvailableAgents(GetAvailableAgentsRequest)
+      returns (GetAvailableAgentsResponse) {}
+  rpc GetAvailableTools(GetAvailableToolsRequest)
+      returns (GetAvailableToolsResponse) {}
+  rpc GetAvailablePrompts(GetAvailablePromptsRequest)
+      returns (GetAvailablePromptsResponse) {}
+  // Add more configuration options as needed
+  rpc GetConfiguration(GetConfigurationRequest)
+      returns (GetConfigurationResponse) {}
+}
+
+message GetAvailableLLMsRequest {}
+
+message GetAvailableLLMsResponse { repeated string llms = 1; }
+
+message GetAvailableAgentsRequest {}
+
+message GetAvailableAgentsResponse { repeated string agents = 1; }
+
+message GetAvailableToolsRequest {}
+
+message GetAvailableToolsResponse { repeated string tools = 1; }
+
+message GetAvailablePromptsRequest {}
+
+message GetAvailablePromptsResponse { repeated string prompts = 1; }
+
+message GetConfigurationRequest {}
+
+message GetConfigurationResponse {
+  repeated string llms = 1;
+  repeated string agents = 2;
+  repeated string tools = 3;
+  repeated string prompts = 4;
+  // Add more configuration options as needed
 }

@@ -24,7 +24,7 @@ class OpenAIHosted(LLM):
 
     @property
     def _identifying_params(self) -> Dict[str, Any]:
-        return {**{"model": self.model}, **self._default_params}
+        return {**self._default_params}
 
     @property
     def _llm_type(self) -> str:

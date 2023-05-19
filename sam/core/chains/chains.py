@@ -1,5 +1,5 @@
 from langchain import LLMChain, PromptTemplate
-from langchain.llms import BaseLLM
+from langchain.llms.base import BaseLLM
 
 from sam.core.utils import logger
 
