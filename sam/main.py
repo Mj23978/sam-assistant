@@ -1,15 +1,12 @@
-import copy
-import os
-
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
-from langchain import Cohere
 from langchain.chains import RetrievalQA
 from pydantic import BaseModel
 
 from sam.core.chains.chains import create_chain
 from sam.core.llms.llms import EmbeddingLoader, LLMLoader
 from sam.core.loaders.loaders import Loaders
+from sam.core.plugins.babyagi.babyagi import BabyAGI
 from sam.core.prompts.prompts import create_prompt_icl_qa
 from sam.core.vectorstore.vectorstores import VectoreStores
 
@@ -18,7 +15,7 @@ load_dotenv()
 # create the app
 app = FastAPI()
 
-# connection_args = {"host": "127.0.0.1", "port": "19530"}
+connection_args = {"host": "127.0.0.1", "port": "19530"}
 # sysctl -w vm.max_map_count=262144
 
 
@@ -37,15 +34,34 @@ async def lang(request: Request, message_request: MessageRequest):
     # model = LLMLoader("cohere", top_k=40, top_p=0.95, model="command-xlarge-nightly" | "command-nightly" | "command-light-nightly")
     # model = LLMLoader("llamacpp")
     # model = LLMLoader("theb").load_model()
-    model = LLMLoader("cohere", top_k=40, top_p=0.95, model="command-xlarge-nightly")
+    model = LLMLoader().load_useless()
     prompt = create_prompt_icl_qa()
-    cohere_api = os.environ.get("COHERE_API_KEY")
     result = create_chain(
         model,
         prompt,
         message_request.message,
     )
     return {"answer": result}
+
+
+@app.post("/babyagi")
+async def babyagi(request: Request, message_request: MessageRequest):
+    llm = LLMLoader().load_useless()
+
+    embeddings = EmbeddingLoader("cohere").load_embeddings()
+    vector_db = VectoreStores(embeddings, connection_args=connection_args).load_milvus()
+
+    verbose = True
+    max_iterations: int = 3
+    baby_agi = BabyAGI.from_llm(
+        llm=llm,
+        vectorstore=vector_db,
+        verbose=verbose,
+        max_iterations=max_iterations,
+    )
+
+    res = baby_agi._call({"objective": message_request.message})
+    return {"answer": res}
 
 
 @app.get("/embed")

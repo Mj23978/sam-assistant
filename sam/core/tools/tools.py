@@ -1,47 +1,52 @@
+import re
 from typing import List, Optional, Type
 
 import requests
 from bs4 import BeautifulSoup
 from langchain.agents import Tool
-from langchain.tools import BaseTool, DuckDuckGoSearchTool
+from langchain.tools import BaseTool
 from langchain.utilities import PythonREPL, WikipediaAPIWrapper
 
 from sam.core.tools.internet import InternetLoader
 
 
 class Tools:
-
     @staticmethod
-    def createTools(tools: List[str]):
+    def createTools(tools: List[str]) -> List[Tool]:
         toolsList: List[Tool] = []
         if "wikipedia" in tools:
             toolsList.append(
                 Tool(
                     description="Useful for when you need to look up a topic, country or person on wikipedia",
                     func=Tools.wikipedia,
-                    name="wikipedia"
-                ))
-        if "duckduckGo" in tools:
-            toolsList.append(
-                Tool(
-                    description="Useful for when you need to do a search on the internet to find information that another tool can't find. be specific with your input.",
-                    func=Tools.duckduckgo,
-                    name="duckduckgo"
-                ))
+                    name="wikipedia",
+                )
+            )
         if "seraxng" in tools:
             toolsList.append(
                 Tool(
                     description="Useful for when you need to do a search on the internet to find information that another tool can't find. be specific with your input.",
                     func=Tools.seraxng,
-                    name="seraxng"
-                ))
+                    name="seraxng",
+                )
+            )
         if "python_repl" in tools:
             toolsList.append(
                 Tool(
                     name="python repl",
                     func=Tools.python_repl,
-                    description="A Python shell. Use this to execute python commands. Input should be a valid python command. If you want to see the output of a value, you should print it out with `print(...)"
-                ))
+                    description="A Python shell. Use this to execute python commands. Input should be a valid python command. If you want to see the output of a value, you should print it out with `print(...)",
+                )
+            )
+        if "web_scrape" in tools:
+            toolsList.append(
+                Tool(
+                    name="Web Scrape",
+                    func=Tools.web_scrape,
+                    description="A Python shell. Use this to execute python commands. Input should be a valid python command. If you want to see the output of a value, you should print it out with `print(...)",
+                )
+            )
+        return toolsList
 
     @staticmethod
     def seraxng(search: str):
@@ -59,9 +64,14 @@ class Tools:
         return repl.run(command)
 
     @staticmethod
-    def duckduckgo(search: str, **kwargs):
-        search = DuckDuckGoSearchTool(**kwargs)
-        return search.run(search)
+    def web_scrape(url: str, **kwargs):
+        response = requests.get(url)
+        print(response)
+        soup = BeautifulSoup(response.content, "html.parser")
+        result = soup.get_text(strip=True) + "URLs: "
+        for link in soup.findAll("a", attrs={"href": re.compile("^https://")}):
+            result += link.get("href") + ", "
+        return result
 
 
 class WebPageTool(BaseTool):

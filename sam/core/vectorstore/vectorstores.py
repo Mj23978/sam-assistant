@@ -14,34 +14,38 @@ from langchain.vectorstores.base import VectorStore
 
 class VectoreStores:
 
-    client: Type[VectorStore]
-    db_type: str = "chroma"
+    client: Milvus | Chroma | DeepLake
     embedding: Embeddings
 
-    def __init__(self, embedding: Embeddings, db_type: Optional[str] = None, **kwargs):
+    def __init__(self, embedding: Embeddings, **kwargs):
 
         self.embedding = embedding
-        if db_type is not None:
-            self.db_type = db_type
         self.kwargs = kwargs
-        if db_type == "chroma":
-            if kwargs.get("persist_directory") is not None:
-                self.persist_directory = kwargs.get("persist_directory")
-            else:
-                self.persist_directory = "db"
-            self.client = Chroma(persist_directory=self.persist_directory, embedding_function=embedding)
-        elif db_type == "deeplake":
-            if kwargs.get("token") is not None:
-                self.token = kwargs.get("token")
-            else:
-                raise ValueError("Must Contain Token when using deeplake")
-            self.client = DeepLake(token=self.token, embedding_function=embedding)
-        elif db_type == "milvus":
-            if kwargs.get("connection_args") is not None:
-                self.connection_args = kwargs.get("connection_args")
-            else:
-                raise ValueError("Must Contain Connection Args when using milvus")
-            self.client = Milvus(connection_args=self.connection_args, embedding_function=embedding)
+
+    def load_chroma(self):
+        if self.kwargs.get("persist_directory") is not None:
+            self.persist_directory = self.kwargs.get("persist_directory")
+        else:
+            self.persist_directory = "db"
+        self.client = Chroma(persist_directory=self.persist_directory, embedding_function=self.embedding) # type: ignore
+        return self.client
+
+    def load_deeplake(self):
+        if self.kwargs.get("token") is not None:
+            self.token = self.kwargs.get("token")
+        else:
+            raise ValueError("Must Contain Token when using deeplake")
+        self.client = DeepLake(token=self.token, embedding_function=self.embedding) # type: ignore
+        return self.client
+
+    def load_milvus(self):
+        if self.kwargs.get("connection_args") is not None:
+            self.connection_args = self.kwargs.get("connection_args")
+        else:
+            raise ValueError("Must Contain Connection Args when using milvus")
+        self.client = Milvus(connection_args=self.connection_args, embedding_function=self.embedding) # type: ignore
+        return self.client
+
 
     def add_documents(self, documents: List[Document], **kwargs):
         if self.db_type == "chroma":

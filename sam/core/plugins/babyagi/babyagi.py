@@ -4,15 +4,12 @@ from typing import Dict, Any, List, Optional
 from langchain import LLMChain
 from langchain.agents import AgentExecutor, ZeroShotAgent
 from langchain.chains.base import Chain
-from langchain.llms import BaseLLM
+from langchain.llms.base import BaseLLM
 from langchain.vectorstores import VectorStore
 from pydantic import BaseModel, Field
-from steamship import Steamship
-from steamship_langchain import OpenAI
-from steamship_langchain.vectorstores import SteamshipVectorStore
 
-from chains import TaskCreationChain, TaskPrioritizationChain
-from prompts import get_prompt, get_tools
+from sam.core.chains.chains import TaskCreationChain, TaskPrioritizationChain
+from sam.core.prompts.prompts import get_prompt, get_tools
 
 
 def get_next_task(
@@ -120,7 +117,7 @@ class BabyAGI(Chain, BaseModel):
     def _call(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         """Run the agent."""
         objective = inputs["objective"]
-        first_task = inputs.get("first_task", "Make a todo list")
+        first_task = inputs.get("first_task", "Develop a task list.")
         self.add_task({"task_id": 1, "task_name": first_task})
         num_iters = 0
         while True:
@@ -174,14 +171,13 @@ class BabyAGI(Chain, BaseModel):
     @classmethod
     def from_llm(
         cls,
-        client: Steamship,
         llm: BaseLLM,
         vectorstore: VectorStore,
         verbose: bool = False,
         **kwargs,
     ) -> "BabyAGI":
         """Initialize the BabyAGI Controller."""
-        tools = get_tools(client)
+        tools = get_tools()
         prompt = get_prompt(tools)
         task_creation_chain = TaskCreationChain.from_llm(llm, verbose=verbose)
         task_prioritization_chain = TaskPrioritizationChain.from_llm(
@@ -202,31 +198,25 @@ class BabyAGI(Chain, BaseModel):
         )
 
 
-def solve_agi_problem(client, objective):
+# def solve_agi_problem(client, objective):
 
-    llm = OpenAI(client=client, temperature=0)
-    vectorstore = SteamshipVectorStore(
-        client=client,
-        index_name=f"{client.config.workspace_handle}_index_{hash(objective)}",
-        embedding="text-embedding-ada-002",
-    )
+#     llm = OpenAI(client=client, temperature=0)
+#     vectorstore = SteamshipVectorStore(
+#         client=client,
+#         index_name=f"{client.config.workspace_handle}_index_{hash(objective)}",
+#         embedding="text-embedding-ada-002",
+#     )
 
-    # Logging of LLMChains
-    verbose = True
-    # If None, will keep on going forever
-    max_iterations: Optional[int] = 3
-    baby_agi = BabyAGI.from_llm(
-        client=client,
-        llm=llm,
-        vectorstore=vectorstore,
-        verbose=verbose,
-        max_iterations=max_iterations,
-    )
+#     # Logging of LLMChains
+#     verbose = True
+#     # If None, will keep on going forever
+#     max_iterations: Optional[int] = 3
+#     baby_agi = BabyAGI.from_llm(
+#         client=client,
+#         llm=llm,
+#         vectorstore=vectorstore,
+#         verbose=verbose,
+#         max_iterations=max_iterations,
+#     )
 
-    yield from baby_agi._call({"objective": objective})
-
-
-if __name__ == "__main__":
-    client = Steamship(workspace="agi_tools_pro")
-    for k in solve_agi_problem(client, "Write status report on Andrew Tate"):
-        print("HELLO", k)
+#     yield from baby_agi._call({"objective": objective})

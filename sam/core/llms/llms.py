@@ -24,7 +24,6 @@ class LLMLoader:
     args: tuple
     kwargs: dict[str, Any]
    
-    model_type: Optional[str] = "cohere"
     stop: Optional[list] = ["### Humen:",
                             "### Instruction:", "### Assistant:", "\nQuestion:"]
     n_ctx: Optional[int] = 2048
@@ -35,9 +34,7 @@ class LLMLoader:
     top_p: Optional[float] = 0.95
     temperature: Optional[float] = 0.4
 
-    def __init__(self, model_type: Optional[str] = None, *args, **kwargs):
-        if model_type is not None:
-            self.model_type = model_type
+    def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
         if kwargs.get("stop") is not None:
@@ -125,8 +122,15 @@ class LLMLoader:
         )
 
     def load_you(self) -> You:
+        detailed = False if self.kwargs.get(
+            "detailed") is None else self.kwargs["detailed"]
+        include_links = False if self.kwargs.get(
+            "include_links") is None else self.kwargs["include_links"]
+
         return You(
             cache=True,
+            detailed=detailed,
+            include_links=include_links,
             verbose=True,
             callback_manager=CallbackManager(
                 [StreamingStdOutCallbackHandler()]),

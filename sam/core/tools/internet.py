@@ -6,7 +6,7 @@ from langchain.utilities import SearxSearchWrapper
 class InternetLoader:
 
     client: SearxSearchWrapper
-    k: Optional[int] = 5
+    k: int = 5
     # List of Good Engines : wiki, arxiv, qwant, github, gitlab
     engines: Optional[List[str]] = ["wiki", "qwant", "google"]
     # List of Good Categories : science, map, it, files, social media, music, news
