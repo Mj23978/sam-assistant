@@ -8,6 +8,13 @@
 
 Sam-assistant is a personal assistant that is designed to understand your documents, search the internet, and in future versions, create and understand images, and communicate with you. It is built in Python, mainly using Langchain and implements most of Langchain's capabilities.
 
+### How to Install & Run
+
+- run `poetry install` to install packages
+- run  `docker-compose up` if you wanna store your embeddings in milvus or use serxng for searching the internet
+- run `poetry run uvicorn sam.main:app --reload` to run rest server (grpc still WIP)
+- Currently ( You, Useless, Cohere, OpenAI, Llama.Cpp ) are working LLM providers For Sam and All Embeddings are working (trying to add more LLM from GPT4Free)
+
 ### Features
 
 This section could list the key features of your personal assistant, including but not limited to:
