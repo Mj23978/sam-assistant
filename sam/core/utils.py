@@ -15,3 +15,10 @@ handler.setFormatter(formatter)
 
 # Add the handler to the logger
 logger.addHandler(handler)
+
+
+def trim_string(string, count: int):
+    words = string.split()
+    trimmed_words = words[:count]
+    trimmed_string = ' '.join(trimmed_words)
+    return trimmed_string

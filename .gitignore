@@ -132,3 +132,4 @@ dmypy.json
 volumes/
 .mypy_cache/
 accounts.txt
+.chroma/

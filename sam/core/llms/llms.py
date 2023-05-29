@@ -88,7 +88,6 @@ class LLMLoader:
             k=self.top_k,
             model=model,
             p=self.top_p,
-            stop=self.stop,
             temperature=self.temperature,
             verbose=True,
             callback_manager=CallbackManager(
@@ -104,7 +103,7 @@ class LLMLoader:
             cache=True,
             openai_api_key=api_key,
             frequency_penalty=self.repeat_penalty,
-            model_name=model,
+            model=model,
             max_tokens=self.max_tokens,
             top_p=self.top_p,
             temperature=self.temperature,
